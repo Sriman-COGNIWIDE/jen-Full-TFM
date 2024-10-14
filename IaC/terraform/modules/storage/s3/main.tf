@@ -50,14 +50,17 @@ resource "aws_s3_bucket_policy" "bucket_policy" {
           aws_s3_bucket.s3.arn,
           "${aws_s3_bucket.s3.arn}/*"
         ]
-        Condition = var.create_endpoint ? {
-          StringEquals = {
+        Condition = {
+          StringEquals = var.create_endpoint ? {
             "aws:SourceVpce" = aws_vpc_endpoint.s3_endpoint[0].id
+          } : null
+          IpAddress = {
+            "aws:SourceIp" = var.allowed_ip
           }
-        } : null
+        }
       }
     ]
-    }) : jsonencode({
+  }) : jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
@@ -102,35 +105,3 @@ resource "aws_vpc_endpoint_route_table_association" "s3_endpoint_route" {
   route_table_id  = var.route_table_ids[count.index]
   vpc_endpoint_id = aws_vpc_endpoint.s3_endpoint[0].id
 }
-
-# resource "aws_iam_policy" "s3_access_policy" {
-#   count       = var.acl == "private" ? 1 : 0
-#   name        = "${var.bucket_name}-access-policy"
-#   description = "IAM policy for accessing the private S3 bucket"
-
-#   policy = jsonencode({
-#     Version = "2012-10-17"
-#     Statement = [
-#       {
-#         Effect = "Allow"
-#         Action = [
-#           "s3:GetObject",
-#           "s3:PutObject",
-#           "s3:DeleteObject",
-#           "s3:ListBucket",
-#           "s3:GetBucketLocation"
-#         ]
-#         Resource = [
-#           aws_s3_bucket.s3.arn,
-#           "${aws_s3_bucket.s3.arn}/*"
-#         ]
-#       },
-#       {
-#         Effect   = "Deny"
-#         Action   = "s3:ListAllMyBuckets"
-#         Resource = "*"
-#       }
-#     ]
-#   })
-# }
-
