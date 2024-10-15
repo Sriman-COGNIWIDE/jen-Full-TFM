@@ -205,38 +205,16 @@ resource "null_resource" "ec2_prov_files" {
 }
 
 resource "aws_iam_role" "ec2_s3_access_role" {
-  count = var.create_iam_role ? 1 : 0
-  name  = "${var.instance_name}-s3-access-role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          Service = "ec2.amazonaws.com"
-        }
-      }
-    ]
-  })
+  count              = var.create_iam_role ? 1 : 0
+  name               = "${var.instance_name}-s3-access-role"
+  assume_role_policy = var.ec2_assume_role_policy
 }
 
 resource "aws_iam_policy" "s3_access_policy" {
   count       = var.create_iam_role ? 1 : 0
   name        = "${var.instance_name}-s3-access-policy"
-  description = "Policy for EC2 to access all S3 buckets"
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect   = "Allow"
-        Action   = "s3:*"
-        Resource = "*"
-      }
-    ]
-  })
+  description = "Policy for EC2 to access S3 buckets"
+  policy      = var.s3_access_policy
 }
 
 resource "aws_iam_role_policy_attachment" "s3_access_attachment" {
