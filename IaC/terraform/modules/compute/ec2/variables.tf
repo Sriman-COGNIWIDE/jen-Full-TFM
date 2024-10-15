@@ -261,7 +261,17 @@ variable "my_ip" {
 }
 
 variable "create_iam_role" {
-  description = "Whether to create an IAM role for S3 access"
-  type        = bool
-  default     = false
+  type    = bool
+  default = false
+}
+
+
+variable "s3_access_policy" {
+  type    = string
+  default = null
+}
+
+variable "ec2_assume_role_policy" {
+  type    = string
+  default = null
 }
