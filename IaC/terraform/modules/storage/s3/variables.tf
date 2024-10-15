@@ -47,3 +47,13 @@ variable "acc_id" {
   default = " "
 
 }
+
+variable "allowed_ip" {
+  type = list(string)
+  default = [ " " ]
+}
+
+variable "policy_file" {
+  type = string
+  default = ""
+}
