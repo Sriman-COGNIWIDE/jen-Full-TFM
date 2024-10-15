@@ -31,47 +31,14 @@ resource "aws_s3_bucket_acl" "bucket_acl" {
 
 resource "aws_s3_bucket_policy" "bucket_policy" {
   bucket = aws_s3_bucket.s3.id
-
-  policy = var.acl == "private" ? jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Sid       = "VPCEndpointAccess"
-        Effect    = "Allow"
-        Principal = "*"
-        Action = [
-          "s3:GetObject",
-          "s3:PutObject",
-          "s3:DeleteObject",
-          "s3:ListBucket",
-          "s3:GetBucketLocation"
-        ]
-        Resource = [
-          aws_s3_bucket.s3.arn,
-          "${aws_s3_bucket.s3.arn}/*"
-        ]
-        Condition = {
-          StringEquals = var.create_endpoint ? {
-            "aws:SourceVpce" = aws_vpc_endpoint.s3_endpoint[0].id
-          } : null
-          IpAddress = {
-            "aws:SourceIp" = var.allowed_ip
-          }
-        }
-      }
-    ]
-  }) : jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Sid       = "PublicReadGetObject"
-        Effect    = "Allow"
-        Principal = "*"
-        Action    = "s3:GetObject"
-        Resource  = "${aws_s3_bucket.s3.arn}/*"
-      }
-    ]
-  })
+  policy = templatefile(
+    var.policy_file,  
+    {
+      bucket_arn     = aws_s3_bucket.s3.arn
+      vpc_endpoint_id = var.create_endpoint ? aws_vpc_endpoint.s3_endpoint[0].id : ""
+      allowed_ip     = var.allowed_ip
+    }
+  )
 
   depends_on = [
     aws_s3_bucket_public_access_block.public_access_block,
