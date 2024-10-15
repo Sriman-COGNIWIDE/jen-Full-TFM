@@ -4,6 +4,7 @@ module "s3_pub" {
   acl         = "public-read"
   obj_path    = "C:/Users/Sriman Mayandi/Downloads/alex.jpg"
   upload_obj  = true
+  policy_file = "${path.module}/public_pol.json"  
 }
 
 module "s3_priv" {
@@ -15,5 +16,7 @@ module "s3_priv" {
   create_endpoint = true
   vpc_id          = data.terraform_remote_state.nets.outputs.net_b_id
   service_name    = "com.amazonaws.us-east-1.s3"
+  allowed_ip      = ["${chomp(data.http.myip.response_body)}/32"]
   route_table_ids = [data.terraform_remote_state.nets.outputs.app_rt_id]
+  policy_file     = "${path.module}/private_pol.json" 
 }
