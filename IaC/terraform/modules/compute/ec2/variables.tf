@@ -49,10 +49,6 @@ variable "lcl-exec" {
   default = false
 }
 
-variable "key_name" {
-  type = string
-}
-
 variable "root_pwd" {
   type    = string
   default = "Adam@123"
@@ -274,4 +270,9 @@ variable "s3_access_policy" {
 variable "ec2_assume_role_policy" {
   type    = string
   default = null
+}
+
+variable "key" {
+  type = string
+  default = " "
 }
