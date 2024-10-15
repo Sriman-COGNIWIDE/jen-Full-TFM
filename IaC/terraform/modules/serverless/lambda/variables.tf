@@ -118,7 +118,11 @@ variable "run_test" {
   default = false
 }
 
-variable "payload" {
-  type    = string
-  default = " "
+variable "policy" {
+  type        = string
+  default     = " "
+}
+
+variable "payload_file" {
+  type        = string
 }
