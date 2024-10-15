@@ -6,7 +6,6 @@ module "vm_nginx" {
   instance_name               = "vm-nginx"
   instance_type               = "t2.micro"
   ami                         = data.aws_ami.amznlinux2023.id
-  key_name                    = "vm-nginx-key"
 
   create_sg               = true
   enable_bastion_ssh      = true
@@ -15,6 +14,7 @@ module "vm_nginx" {
   default_egress_internet = true
 
   allow_rmte_exec = true
+  key = "${module.vm_nginx.tls_key}"
   remote_exec_cmds = ["sudo yum update",
     "sudo yum install nginx -y > /dev/null 2>&1",
     "sudo nginx -v > /dev/null 2>&1",
@@ -30,7 +30,6 @@ module "vm_connect" {
   instance_name = "vm-connect"
   instance_type = "t2.micro"
   ami           = data.aws_ami.amznlinux2023.id
-  key_name      = "vm-connect-key"
 
   create_sg                 = true
   enable_ssh                = true
@@ -41,6 +40,7 @@ module "vm_connect" {
   allow_rmt_via_bastion = true
   bastion_ip            = module.vm_nginx.public_ip
   bastion_private_key   = module.vm_nginx.tls_key
+  key = "${module.vm_connect.tls_key}"
   bastion_username      = "ec2-user"
   remote_exec_cmds = [
     "curl -X POST http://${module.vm_app_1.private_ip}:5000/recipes -H 'Content-Type: application/json' -d '{\"name\": \"idly\", \"description\": \"a rice cake\"}'",
@@ -59,13 +59,13 @@ module "vm_bastion" {
   instance_name               = "vm-bastion"
   instance_type               = "t2.micro"
   ami                         = data.aws_ami.amznlinux2023.id
-  key_name                    = "vm-bastion-key"
 
   create_sg               = true
   enable_bastion_ssh      = true
   default_egress_internet = true
 
   allow_rmte_exec = true
+  key = "${module.vm_bastion.tls_key}"
   remote_exec_cmds = [
     "echo Transfering keys!",
     "sudo echo '${sensitive(module.vm_app_1.tls_key)}' > vm_app_1_key.pem",
@@ -84,7 +84,6 @@ module "vm_app_1" {
   instance_name = "vm-app-1"
   instance_type = "t2.micro"
   ami           = data.aws_ami.amznlinux2023.id
-  key_name      = "vm-app-1-key"
 
   create_sg                 = true
   enable_ssh                = true
@@ -103,7 +102,6 @@ module "vm_app_1" {
   ec2_assume_role_policy = file("${path.module}/ec2_assume_role_policy.json")
 }
 
-
 module "vm_app_2" {
   source        = "../../../../modules/compute/ec2"
   vpc_id        = data.terraform_remote_state.nets.outputs.net_b_id
@@ -111,7 +109,6 @@ module "vm_app_2" {
   instance_name = "vm-app-2"
   instance_type = "t2.micro"
   ami           = data.aws_ami.amznlinux2023.id
-  key_name      = "vm-app-2-key"
 
   create_sg = false
   sg_id     = module.vm_app_1.security_group_id
