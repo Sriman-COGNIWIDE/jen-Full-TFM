@@ -55,18 +55,7 @@ resource "aws_iam_role" "lambda_role" {
   count = var.create_role ? 1 : 0
   name  = var.role_name
 
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          Service = "lambda.amazonaws.com"
-        }
-      }
-    ]
-  })
+  assume_role_policy = var.policy
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_vpc_access" {
@@ -100,70 +89,7 @@ resource "aws_lambda_layer_version" "lambda_layer" {
 resource "aws_lambda_invocation" "test_lambda" {
   count         = var.run_test == true ? 1 : 0
   function_name = aws_lambda_function.lambda_function.function_name
-
-  input = var.payload
+  input = file(var.payload_file)
 
   depends_on = [aws_lambda_function.lambda_function]
 }
-
-# resource "aws_lambda_invocation" "test_get_by_id_lambda" {
-#   count         = var.run_test && var.function_name == "get-recipe-by-id" ? 1 : 0
-#   function_name = aws_lambda_function.lambda_function.function_name
-
-#   input = jsonencode({
-#     httpMethod = "GET"
-#     path       = "/recipe/2"
-#     headers = {
-#       "Content-Type" = "application/json"
-#     }
-#   })
-
-#   depends_on = [aws_lambda_function.lambda_function]
-# }
-
-# resource "aws_lambda_invocation" "test_post_lambda" {
-#   count         = var.run_test && var.function_name == "post-recipe" ? 1 : 0
-#   function_name = aws_lambda_function.lambda_function.function_name
-
-# input = jsonencode({
-#   httpMethod = "POST"
-#   path       = "/recipes"
-#   headers = {
-#     "Content-Type" = "application/json"
-#   }
-#   body = "{\"name\": \"jigarthanda\", \"description\": \"A classic southern drink.\"}"
-# })
-
-#   depends_on = [aws_lambda_function.lambda_function]
-# }
-
-# resource "aws_lambda_invocation" "test_put_lambda" {
-#   count         = var.run_test && var.function_name == "put-recipe" ? 1 : 0
-#   function_name = aws_lambda_function.lambda_function.function_name
-
-# input = jsonencode({
-#   httpMethod = "PUT"
-#   path       = "/recipe/8"
-#   headers = {
-#     "Content-Type" = "application/json"
-#   }
-#   body = "{\"name\": \"Spaghetti \", \"description\": \"My fav.\"}"
-# })
-
-#   depends_on = [aws_lambda_function.lambda_function]
-# }
-
-# resource "aws_lambda_invocation" "test_delete_lambda" {
-#   count         = var.run_test && var.function_name == "delete-recipe" ? 1 : 0
-#   function_name = aws_lambda_function.lambda_function.function_name
-
-# input = jsonencode({
-#   httpMethod = "DELETE"
-#   path       = "/recipe/2"
-#   headers = {
-#     "Content-Type" = "application/json"
-#   }
-# })
-
-#   depends_on = [aws_lambda_function.lambda_function]
-# }
