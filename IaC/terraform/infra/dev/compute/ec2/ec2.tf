@@ -43,8 +43,8 @@ module "vm_connect" {
   bastion_private_key   = module.vm_nginx.tls_key
   bastion_username      = "ec2-user"
   remote_exec_cmds = [
-    "curl -X POST http://${module.vm_app_1.private_ip}:5000/recipes -H 'Content-Type: application/json' -d '{\"name\": \"idly\", \"description\": \"A  dish\"}'",
-    "curl -X POST http://${module.vm_app_2.private_ip}:5000/recipes -H 'Content-Type: application/json' -d '{\"name\": \"poori\", \"description\": \"A nice but unhealthy dish\"}'",
+    "curl -X POST http://${module.vm_app_1.private_ip}:5000/recipes -H 'Content-Type: application/json' -d '{\"name\": \"idly\", \"description\": \"a rice cake\"}'",
+    "curl -X POST http://${module.vm_app_2.private_ip}:5000/recipes -H 'Content-Type: application/json' -d '{\"name\": \"poori\", \"description\": \"a deep-fried  bread\"}'",
     "curl http://${module.vm_app_2.private_ip}:5000/recipes"
   ]
 
@@ -96,10 +96,13 @@ module "vm_app_1" {
   enable_app_flask          = true
   default_egress_internet   = true
 
-  allow_user_data = true
-  user_data_path  = "../ec2/instl_req.sh"
-  create_iam_role = true
+  allow_user_data        = true
+  user_data_path         = "../ec2/instl_req.sh"
+  create_iam_role        = true
+  s3_access_policy       = file("${path.module}/s3_access_policy.json")
+  ec2_assume_role_policy = file("${path.module}/ec2_assume_role_policy.json")
 }
+
 
 module "vm_app_2" {
   source        = "../../../../modules/compute/ec2"
@@ -115,5 +118,8 @@ module "vm_app_2" {
 
   allow_user_data = true
   user_data_path  = "../ec2/instl_req.sh"
-  create_iam_role = true
+
+  create_iam_role        = true
+  s3_access_policy       = file("${path.module}/s3_access_policy.json")
+  ec2_assume_role_policy = file("${path.module}/ec2_assume_role_policy.json")
 }
