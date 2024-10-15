@@ -23,17 +23,10 @@ module "get_lambda" {
   db_name     = local.lambda_creds.db_name
   db_username = sensitive(local.lambda_creds.db_username)
 
-  payload = jsonencode({
-    httpMethod = "GET"
-    path       = "/recipes"
-    headers = {
-      "Content-Type" = "application/json"
-    }
-    queryStringParameters = {}
-    body                  = null
-  })
+  policy = file("${path.module}/lambda_assume_role_policy.json")
+  payload_file  = "${path.module}/get_lambda_payload.json"
 
-  run_test = false
+  run_test = true
 }
 
 module "get_by_id_lambda" {
@@ -57,15 +50,10 @@ module "get_by_id_lambda" {
   db_name     = local.lambda_creds.db_name
   db_username = sensitive(local.lambda_creds.db_username)
 
-  payload = jsonencode({
-    httpMethod = "GET"
-    path       = "/recipe/2"
-    headers = {
-      "Content-Type" = "application/json"
-    }
-  })
+  policy = file("${path.module}/lambda_assume_role_policy.json")
+  payload_file  = "${path.module}/get_by_id_lambda_payload.json"
 
-  run_test = false
+  run_test = true
 }
 
 module "post_lambda" {
@@ -89,16 +77,10 @@ module "post_lambda" {
   db_name     = local.lambda_creds.db_name
   db_username = sensitive(local.lambda_creds.db_username)
 
-  payload = jsonencode({
-    httpMethod = "POST"
-    path       = "/recipes"
-    headers = {
-      "Content-Type" = "application/json"
-    }
-    body = "{\"name\": \"jigarthanda\", \"description\": \"A classic southern drink.\"}"
-  })
+  policy = file("${path.module}/lambda_assume_role_policy.json")
+  payload_file = "${path.module}/post_lambda_payload.json"
 
-  run_test = false
+  run_test = true
 }
 
 module "put_lambda" {
@@ -122,16 +104,10 @@ module "put_lambda" {
   db_name     = local.lambda_creds.db_name
   db_username = sensitive(local.lambda_creds.db_username)
 
-  payload = jsonencode({
-    httpMethod = "PUT"
-    path       = "/recipe/8"
-    headers = {
-      "Content-Type" = "application/json"
-    }
-    body = "{\"name\": \"Spaghetti \", \"description\": \"My fav.\"}"
-  })
+  policy = file("${path.module}/lambda_assume_role_policy.json")
+  payload_file = "${path.module}/put_lambda_payload.json"
 
-  run_test = false
+  run_test = true
 }
 
 module "delete_lambda" {
@@ -155,15 +131,10 @@ module "delete_lambda" {
   db_name     = local.lambda_creds.db_name
   db_username = sensitive(local.lambda_creds.db_username)
 
-  payload = jsonencode({
-    httpMethod = "DELETE"
-    path       = "/recipe/2"
-    headers = {
-      "Content-Type" = "application/json"
-    }
-  })
+  policy = file("${path.module}/lambda_assume_role_policy.json")
+  payload_file = "${path.module}/delete_lambda_payload.json"
 
-  run_test = false
+  run_test = true
 }
 
 module "http_api_gateway" {
