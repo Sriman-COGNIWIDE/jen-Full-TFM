@@ -61,7 +61,7 @@ resource "aws_security_group" "ec2_sg" {
       description = "flask-app-rule"
     }
   }
-
+ 
   dynamic "ingress" {
     for_each = var.enable_app_vpc_peering_ig ? [1] : []
     content {
@@ -115,7 +115,7 @@ resource "aws_instance" "ec2_instance" {
   ami                         = var.ami
   instance_type               = var.instance_type
   subnet_id                   = var.subnet_id
-  key_name                    = var.key_name
+  key_name                    = aws_key_pair.ec2_1.key_name
   iam_instance_profile        = var.create_iam_role ? aws_iam_instance_profile.ec2_s3_profile[0].name : null
   associate_public_ip_address = var.associate_public_ip_address
   vpc_security_group_ids      = var.create_sg ? [aws_security_group.ec2_sg[0].id] : [var.sg_id]
@@ -152,7 +152,7 @@ resource "null_resource" "ec2_prov_file" {
   connection {
     type        = "ssh"
     user        = "ec2-user"
-    private_key = tls_private_key.example.private_key_pem
+    private_key = var.key
     host        = aws_instance.ec2_instance.public_ip
   }
   provisioner "file" {
@@ -174,7 +174,7 @@ resource "null_resource" "ec2_prov_rmt_via_bastion" {
     bastion_user        = var.bastion_username
     bastion_private_key = var.bastion_private_key
     bastion_port        = var.bastion_port
-    private_key         = tls_private_key.example.private_key_pem
+    private_key         = var.key
     host                = aws_instance.ec2_instance.private_ip
   }
   provisioner "remote-exec" {
@@ -191,7 +191,7 @@ resource "null_resource" "ec2_prov_files" {
   connection {
     type        = "ssh"
     user        = "ec2-user"
-    private_key = tls_private_key.example.private_key_pem
+    private_key = var.key
     host        = aws_instance.ec2_instance.public_ip
   }
   provisioner "file" {
