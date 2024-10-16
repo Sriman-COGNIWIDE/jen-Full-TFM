@@ -1,8 +1,0 @@
-resource "aws_vpc" "vpcs" {
-  cidr_block = var.cidr_block
-
-  tags = {
-    Name      = var.vpc_name
-    terraform = true
-  }
-}
