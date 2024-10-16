@@ -1,16 +1,22 @@
+import json
+import logging
+import os
+import re
+import unicodedata
+import bleach
+import boto3
+import botocore
+import botocore.session
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from marshmallow import Schema, fields, validate
 from sqlalchemy_utils import database_exists, create_database
 from sqlalchemy.exc import IntegrityError
-import logging
-import bleach
-import re
-import unicodedata
-import json
-import os
+from aws_secretsmanager_caching import SecretCache, SecretCacheConfig
+from botocore.exceptions import ClientError
 
 logging.basicConfig(level=logging.WARNING)
+logger = logging.getLogger(__name__)
 
 db = SQLAlchemy()
 
@@ -83,6 +89,37 @@ def validate_input(data):
         return False
     return True
 
+def get_db_credentials():
+    region_name = os.environ.get('AWS_REGION', 'us-east-1')
+    logger.debug(f"using AWS region: {region_name}")
+    print("aws region :"+region_name)
+
+    try:
+        session = boto3.session.Session()
+        client = session.client(
+            service_name='secretsmanager',
+            region_name=region_name
+        )
+        logger.debug("Successfully created Secrets Manager client")
+
+        secret_name = "rds_credentials"
+        logger.debug(f"Attempting to retrieve secret: {secret_name}")
+
+        get_secret_value_response = client.get_secret_value(SecretId=secret_name)
+        logger.debug("Successfully retrieved secret value")
+
+        if 'SecretString' in get_secret_value_response:
+            secret = get_secret_value_response['SecretString']
+            return json.loads(secret)
+        else:
+            logger.error("Unexpected secret format")
+            raise ValueError("Unexpected secret format")
+
+    except ClientError as e:
+        logger.error(f"Error retrieving secret: {e}")
+        raise e
+
+
 def init_db():
     engine = db.engine
     if not database_exists(engine.url):
@@ -91,7 +128,9 @@ def init_db():
 
 def create_app():
     app = Flask(__name__)
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get('DATABASE_URL')
+    db_creds = get_db_credentials()
+    db_uri = f"postgresql://{db_creds['db_username']}:{db_creds['db_password']}@{db_creds['db_endpoint']}:{db_creds['db_port']}/{db_creds['db_name']}"
+    app.config["SQLALCHEMY_DATABASE_URI"] = db_uri
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config['SQLALCHEMY_ECHO'] = False
     db.init_app(app)
@@ -228,4 +267,4 @@ def create_app():
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(host=<host>, port=int(os.environ.get(<port>)))
+    app.run(host='0.0.0.0', port=5000)
