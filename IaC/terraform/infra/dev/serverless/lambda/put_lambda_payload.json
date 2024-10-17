@@ -1,8 +1,0 @@
-{
-    "httpMethod": "PUT",
-    "path": "/recipe/2",
-    "headers": {
-      "Content-Type": "application/json"
-    },
-    "body": "{\"name\": \"Spaghetti\", \"description\": \"My fav.\"}"
-  }

@@ -1,7 +1,0 @@
-{
-    "httpMethod": "GET",
-    "path": "/recipe/2",
-    "headers": {
-      "Content-Type": "application/json"
-    }
-  }
