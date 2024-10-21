@@ -91,7 +91,8 @@ module "vm_app_1" {
   enable_ssh                = true
   sg_ssh_cidr               = [data.terraform_remote_state.nets.outputs.bastion_subnet_cidr]
   enable_app_db_access      = true
-  app_db_cidr               = [data.terraform_remote_state.nets.outputs.db_subnet_1_cidr, data.terraform_remote_state.nets.outputs.db_subnet_2_cidr]
+  app_db_cidr               = [data.terraform_remote_state.nets.outputs.db_subnet_1_cidr, 
+  data.terraform_remote_state.nets.outputs.db_subnet_2_cidr]
   enable_app_vpc_peering_ig = true
   app_peer_cidr             = [data.terraform_remote_state.nets.outputs.connect_subnet_cidr]
   enable_app_flask          = true
