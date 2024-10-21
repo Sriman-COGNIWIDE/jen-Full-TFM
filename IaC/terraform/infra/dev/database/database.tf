@@ -9,5 +9,5 @@ module "rds_postgres" {
   db_password        = module.rds_postgres.random_pass
   instance_class     = "db.t3.medium"
   allocated_storage  = 10
-  ingress_cidr_block = ["10.1.2.0/24"]
+  ingress_cidr_block = [data.terraform_remote_state.nets.outputs.app_subnet_cidr]
 }
