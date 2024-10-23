@@ -1,0 +1,8 @@
+{
+    "httpMethod": "POST",
+    "path": "/recipes",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": "{\"name\": \"jigarthanda\", \"description\": \"a southern drink.\"}"
+  }
