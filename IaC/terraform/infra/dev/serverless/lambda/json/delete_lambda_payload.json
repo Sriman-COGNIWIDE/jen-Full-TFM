@@ -1,7 +1,0 @@
-{
-    "httpMethod": "DELETE",
-    "path": "/recipe/3",
-    "headers": {
-      "Content-Type": "application/json"
-    }
-  }
